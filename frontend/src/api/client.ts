@@ -18,19 +18,12 @@ function assertApiPath(path: string) {
 }
 
 function friendlyFetchError(): Error {
-  if (import.meta.env.PROD && !API_BASE) {
-    return new Error('Game server not configured. Set VITE_API_URL on Vercel, then redeploy.');
-  }
   return new Error('Cannot reach the game server. It may be waking up. Wait 30 seconds and try again.');
 }
 
 class ApiClient {
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
     assertApiPath(path);
-
-    if (import.meta.env.PROD && !API_BASE) {
-      throw friendlyFetchError();
-    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

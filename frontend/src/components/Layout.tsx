@@ -7,16 +7,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children, showFooter = true }: LayoutProps) {
-  const missingApi = import.meta.env.PROD && !import.meta.env.VITE_API_URL;
-
   return (
     <div className="min-h-screen flex flex-col">
-      {missingApi && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-center text-sm py-2 px-4">
-          Game server not linked yet. Set <strong>VITE_API_URL</strong> on Vercel to your Render API URL, then redeploy.
-        </div>
-      )}
-
       <motion.header
         initial={{ y: -16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

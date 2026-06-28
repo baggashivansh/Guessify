@@ -7,12 +7,12 @@ spring:
     timeout-per-shutdown-phase: 30s
 
 guessify:
-  frontend-base-url: ${GUESSIFY_FRONTEND_BASE_URL:http://localhost:5173}
+  frontend-base-url: ${GUESSIFY_FRONTEND_BASE_URL:https://guessify-eight.vercel.app}
   cors:
-    allowed-origins: ${GUESSIFY_CORS_ORIGINS:http://localhost:5173}
+    allowed-origins: ${GUESSIFY_CORS_ORIGINS:https://guessify-eight.vercel.app,https://guessify-git-main-baggashivanshs-projects.vercel.app}
   security:
     require-origin-on-mutations: true
-    daily-secret: ${GUESSIFY_DAILY_SECRET}
+    daily-secret: ${GUESSIFY_DAILY_SECRET:change-me-set-GUESSIFY_DAILY_SECRET-on-render}
 
 management:
   endpoints:
