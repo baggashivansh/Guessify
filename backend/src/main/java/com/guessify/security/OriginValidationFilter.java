@@ -39,10 +39,11 @@ public class OriginValidationFilter extends OncePerRequestFilter {
                 && !request.getRequestURI().equals("/api/health")) {
             String origin = request.getHeader("Origin");
             if (origin == null || origin.isBlank()) {
-                reject(response);
-                return;
-            }
-            if (!isAllowedOrigin(origin)) {
+                if (!isAllowedProxyRequest(request)) {
+                    reject(response);
+                    return;
+                }
+            } else if (!isAllowedOrigin(origin)) {
                 reject(response);
                 return;
             }
@@ -54,19 +55,39 @@ public class OriginValidationFilter extends OncePerRequestFilter {
         if (allowedOrigins.contains(origin)) {
             return true;
         }
+        return isAllowedHost(extractHost(origin));
+    }
+
+    private boolean isAllowedProxyRequest(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        if (referer != null && !referer.isBlank() && isAllowedHost(extractHost(referer))) {
+            return true;
+        }
+        String forwardedHost = request.getHeader("X-Forwarded-Host");
+        if (forwardedHost != null && !forwardedHost.isBlank()) {
+            String host = forwardedHost.split(",")[0].trim();
+            return isAllowedHost(host);
+        }
+        return false;
+    }
+
+    private String extractHost(String url) {
         try {
-            URI uri = URI.create(origin);
-            String host = uri.getHost();
-            if (host == null) {
-                return false;
-            }
-            if (host.equals("localhost") || host.equals("127.0.0.1")) {
-                return true;
-            }
-            return host.endsWith(".vercel.app");
+            URI uri = URI.create(url);
+            return uri.getHost();
         } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private boolean isAllowedHost(String host) {
+        if (host == null || host.isBlank()) {
             return false;
         }
+        if (host.equals("localhost") || host.equals("127.0.0.1")) {
+            return true;
+        }
+        return host.endsWith(".vercel.app");
     }
 
     private boolean isMutation(HttpServletRequest request) {
