@@ -34,14 +34,14 @@ Open **http://localhost:5173**
 
 ## 1. Deploy Backend (Render)
 
-### Option A — Render Dashboard
+### Option A — Render Dashboard (Web Service)
 
 1. Push this repo to GitHub
 2. Go to [render.com](https://render.com) → **New Web Service**
-3. Connect your repo
+3. Connect your **Guessify** repo
 4. Settings:
-   - **Root Directory:** `backend`
-   - **Runtime:** Docker (uses `backend/Dockerfile`)
+   - **Root Directory:** leave empty (repo root — `Dockerfile` is at the top level)
+   - **Runtime:** Docker
    - **Health Check Path:** `/api/health`
 5. Environment variables:
 
@@ -63,12 +63,10 @@ Use `render.yaml` at repo root with Render Blueprint deploy.
 ## 2. Deploy Frontend (Vercel)
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project**
-2. Import your GitHub repo
+2. Import your GitHub **Guessify** repo
 3. Settings:
-   - **Root Directory:** `frontend`
-   - **Framework:** Vite
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
+   - **Root Directory:** leave empty (repo root — root `vercel.json` builds `frontend/`)
+   - **Framework Preset:** Other (or Vite — auto-detected)
 4. Environment variable:
 
 | Variable | Value |
