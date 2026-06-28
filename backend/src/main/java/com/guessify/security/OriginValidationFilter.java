@@ -1,7 +1,6 @@
 package com.guessify.security;
 
 import com.guessify.config.GuessifyProperties;
-import com.guessify.exception.GuessifyException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,12 +42,31 @@ public class OriginValidationFilter extends OncePerRequestFilter {
                 reject(response);
                 return;
             }
-            if (!allowedOrigins.contains(origin)) {
+            if (!isAllowedOrigin(origin)) {
                 reject(response);
                 return;
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isAllowedOrigin(String origin) {
+        if (allowedOrigins.contains(origin)) {
+            return true;
+        }
+        try {
+            URI uri = URI.create(origin);
+            String host = uri.getHost();
+            if (host == null) {
+                return false;
+            }
+            if (host.equals("localhost") || host.equals("127.0.0.1")) {
+                return true;
+            }
+            return host.endsWith(".vercel.app");
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private boolean isMutation(HttpServletRequest request) {

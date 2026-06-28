@@ -10,47 +10,37 @@ export function Layout({ children, showFooter = true }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <motion.header
-        initial={{ y: -16, opacity: 0 }}
+        initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="sticky top-0 z-50 border-b border-surface-border/60 bg-white/85 backdrop-blur-xl"
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="sticky top-0 z-50 bg-white/72 backdrop-blur-2xl backdrop-saturate-150"
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2.5 group min-w-0 flex-1">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-white border border-surface-border shadow-sm flex items-center justify-center overflow-hidden p-1">
-              <img
-                src="/icons/logo-mark.png"
-                alt="Guessify"
-                className="h-full w-full object-contain"
-              />
-            </div>
-            <div className="min-w-0 leading-tight">
-              <div className="font-display font-bold text-base sm:text-lg tracking-tight text-ink group-hover:text-accent transition-colors">
-                <span className="truncate">Guessify</span>
-                <span className="text-ink-faint font-semibold mx-1.5 hidden sm:inline">·</span>
-                <span className="text-ink-muted font-medium text-sm sm:text-base hidden sm:inline">
-                  Guess the Number
-                </span>
-              </div>
-              <div className="text-[11px] text-ink-faint font-medium sm:hidden">Guess the Number</div>
-            </div>
-          </Link>
-
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 h-[3.25rem] flex items-center">
           <Link
             to="/"
-            className="shrink-0 text-sm font-semibold text-accent hover:text-accent-dark bg-accent-soft hover:bg-accent/15 px-4 py-2 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2.5 group min-w-0"
+            aria-label="Guessify home"
           >
-            New Game
+            <img
+              src="/icons/logo-mark.png"
+              alt=""
+              className="h-8 w-8 shrink-0 object-contain"
+              draggable={false}
+            />
+            <span className="font-display font-semibold text-[1.05rem] tracking-tight text-ink group-hover:text-accent transition-colors duration-200">
+              Guessify
+            </span>
           </Link>
         </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-surface-border/80 to-transparent" />
       </motion.header>
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">{children}</main>
 
       {showFooter && (
-        <footer className="py-5 mt-auto">
-          <div className="max-w-5xl mx-auto px-4 text-center text-xs text-ink-faint/45">
-            Built by <span className="text-ink-faint/60">Shivansh Bagga</span>
+        <footer className="py-4 mt-auto pointer-events-none select-none">
+          <div className="max-w-5xl mx-auto px-4 text-center text-[10px] text-ink-faint/30">
+            Built by Shivansh Bagga
           </div>
         </footer>
       )}

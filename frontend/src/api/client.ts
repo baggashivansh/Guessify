@@ -51,7 +51,7 @@ class ApiClient {
       const error = await response.json().catch(() => ({ message: 'Something went wrong' }));
       const message = error.message ?? 'Something went wrong';
       if (response.status === 403 && message.toLowerCase().includes('origin')) {
-        throw new Error('Server blocked this site. Add your Vercel URL to CORS on Render.');
+        throw new Error('Server is updating. Wait a minute and try again.');
       }
       throw new Error(message);
     }

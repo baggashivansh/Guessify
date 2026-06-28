@@ -8,6 +8,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        config.setAllowedOrigins(origins);
+        List<String> patterns = new ArrayList<>(List.of(
+                "https://*.vercel.app",
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+        ));
+        patterns.addAll(origins);
+        config.setAllowedOriginPatterns(patterns);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
                 "Content-Type",
