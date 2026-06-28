@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-surface-border;
+  }
+
+  body {
+    @apply bg-surface text-ink font-sans antialiased min-h-screen;
+    background-image:
+      radial-gradient(ellipse 90% 50% at 50% -10%, rgba(99, 102, 241, 0.07), transparent),
+      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(129, 140, 248, 0.05), transparent),
+      radial-gradient(ellipse 40% 30% at 0% 100%, rgba(99, 102, 241, 0.04), transparent);
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface-card border border-surface-border rounded-2xl shadow-card;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:shadow-card-hover hover:border-accent/20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-accent-dark via-accent to-accent-light bg-clip-text text-transparent;
+  }
+
+  .input-field {
+    @apply w-full bg-surface-raised border border-surface-border rounded-xl px-4 py-4 text-ink
+      placeholder:text-ink-faint shadow-input
+      focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all;
+  }
+}

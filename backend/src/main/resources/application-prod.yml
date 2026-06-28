@@ -1,0 +1,24 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+guessify:
+  frontend-base-url: ${GUESSIFY_FRONTEND_BASE_URL:http://localhost:5173}
+  cors:
+    allowed-origins: ${GUESSIFY_CORS_ORIGINS:http://localhost:5173}
+  security:
+    require-origin-on-mutations: true
+    daily-secret: ${GUESSIFY_DAILY_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

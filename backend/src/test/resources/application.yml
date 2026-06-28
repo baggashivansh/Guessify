@@ -1,0 +1,18 @@
+guessify:
+  frontend-base-url: http://localhost:5173
+  cors:
+    allowed-origins: http://localhost:5173
+  room:
+    max-players: 10
+    code-length: 6
+    ttl-hours: 24
+  rate-limit:
+    guesses-per-second: 2
+    requests-per-minute: 120
+  nickname:
+    max-length: 20
+  security:
+    session-ttl-hours: 24
+    max-guesses-per-game: 50
+    require-origin-on-mutations: false
+    daily-secret: test-daily-secret

@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  max-http-request-header-size: 16KB
+
+spring:
+  application:
+    name: guessify-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  servlet:
+    multipart:
+      max-file-size: 1KB
+      max-request-size: 16KB
+  jackson:
+    default-property-inclusion: non_null
+
+guessify:
+  frontend-base-url: http://localhost:5173
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:4173
+  room:
+    max-players: 10
+    code-length: 6
+    ttl-hours: 24
+  rate-limit:
+    guesses-per-second: 2
+    requests-per-minute: 120
+  nickname:
+    max-length: 20
+  security:
+    session-ttl-hours: 24
+    max-guesses-per-game: 50
+    require-origin-on-mutations: true
+    daily-secret: ${GUESSIFY_DAILY_SECRET:dev-only-change-in-production}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
