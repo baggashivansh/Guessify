@@ -9,7 +9,7 @@ import type {
 import { getClientId } from '../utils/storage';
 import { isValidDifficulty, normalizeResourceCode } from '../utils/validation';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 function assertApiPath(path: string) {
   if (!path.startsWith('/api/')) {
@@ -17,9 +17,20 @@ function assertApiPath(path: string) {
   }
 }
 
+function friendlyFetchError(): Error {
+  if (import.meta.env.PROD && !API_BASE) {
+    return new Error('Game server not configured. Set VITE_API_URL on Vercel, then redeploy.');
+  }
+  return new Error('Cannot reach the game server. It may be waking up. Wait 30 seconds and try again.');
+}
+
 class ApiClient {
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
     assertApiPath(path);
+
+    if (import.meta.env.PROD && !API_BASE) {
+      throw friendlyFetchError();
+    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -30,17 +41,26 @@ class ApiClient {
     const clientId = getClientId();
     headers['X-Client-Id'] = clientId;
 
-    const response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-      credentials: 'same-origin',
-      mode: 'cors',
-      cache: 'no-store',
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+        credentials: 'same-origin',
+        mode: 'cors',
+        cache: 'no-store',
+      });
+    } catch {
+      throw friendlyFetchError();
+    }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message ?? 'Something went wrong');
+      const error = await response.json().catch(() => ({ message: 'Something went wrong' }));
+      const message = error.message ?? 'Something went wrong';
+      if (response.status === 403 && message.toLowerCase().includes('origin')) {
+        throw new Error('Server blocked this site. Add your Vercel URL to CORS on Render.');
+      }
+      throw new Error(message);
     }
 
     return response.json();

@@ -13,9 +13,9 @@ export interface DifficultyInfo {
 }
 
 export const DIFFICULTIES: DifficultyInfo[] = [
-  { key: 'EASY', label: 'Easy', range: '1–100', min: 1, max: 100, description: 'Quick & casual' },
-  { key: 'MEDIUM', label: 'Medium', range: '1–500', min: 1, max: 500, description: 'Balanced challenge' },
-  { key: 'HARD', label: 'Hard', range: '1–1000', min: 1, max: 1000, description: 'For the bold' },
+  { key: 'EASY', label: 'Easy', range: '1 to 100', min: 1, max: 100, description: 'Quick and casual' },
+  { key: 'MEDIUM', label: 'Medium', range: '1 to 500', min: 1, max: 500, description: 'Balanced challenge' },
+  { key: 'HARD', label: 'Hard', range: '1 to 1000', min: 1, max: 1000, description: 'For the bold' },
 ];
 
 export interface PlayerSummary {
