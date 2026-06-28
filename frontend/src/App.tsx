@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Layout } from './components/Layout';
 import { AnimatedPage } from './components/AnimatedPage';
+import { AppSplash } from './components/AppSplash';
 import { Home } from './pages/Home';
 import { PartyCreate } from './pages/PartyCreate';
 import { PartyRoom } from './pages/PartyRoom';
@@ -14,25 +16,34 @@ import { DailyGame } from './pages/DailyGame';
 
 export default function App() {
   const location = useLocation();
+  const [splashDone, setSplashDone] = useState(false);
 
   return (
-    <Layout>
+    <>
       <AnimatePresence mode="wait">
-        <AnimatedPage key={location.pathname}>
-          <Routes location={location}>
-            <Route path="/" element={<Home />} />
-            <Route path="/party/create" element={<PartyCreate />} />
-            <Route path="/party/:code" element={<PartyRoom />} />
-            <Route path="/party/:code/play" element={<PartyGame />} />
-            <Route path="/party/:code/results" element={<PartyResults />} />
-            <Route path="/async" element={<Home />} />
-            <Route path="/async/play" element={<SoloGame />} />
-            <Route path="/daily" element={<DailyPick />} />
-            <Route path="/challenge/:code" element={<ChallengeGame />} />
-            <Route path="/daily/:difficulty" element={<DailyGame />} />
-          </Routes>
-        </AnimatedPage>
+        {!splashDone && <AppSplash key="splash" onDone={() => setSplashDone(true)} />}
       </AnimatePresence>
-    </Layout>
+
+      {splashDone && (
+        <Layout>
+          <AnimatePresence mode="wait">
+            <AnimatedPage key={location.pathname}>
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/party/create" element={<PartyCreate />} />
+                <Route path="/party/:code" element={<PartyRoom />} />
+                <Route path="/party/:code/play" element={<PartyGame />} />
+                <Route path="/party/:code/results" element={<PartyResults />} />
+                <Route path="/async" element={<Home />} />
+                <Route path="/async/play" element={<SoloGame />} />
+                <Route path="/daily" element={<DailyPick />} />
+                <Route path="/challenge/:code" element={<ChallengeGame />} />
+                <Route path="/daily/:difficulty" element={<DailyGame />} />
+              </Routes>
+            </AnimatedPage>
+          </AnimatePresence>
+        </Layout>
+      )}
+    </>
   );
 }

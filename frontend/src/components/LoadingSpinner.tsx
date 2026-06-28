@@ -1,29 +1,22 @@
 import { motion } from 'framer-motion';
+import { LogoMark } from './LogoMark';
 
 interface LoadingSpinnerProps {
   label?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
-const sizes = {
-  sm: 'w-5 h-5 border-2',
-  md: 'w-8 h-8 border-[3px]',
-  lg: 'w-12 h-12 border-4',
-};
-
-export function LoadingSpinner({ label = 'Loading', size = 'md' }: LoadingSpinnerProps) {
+export function LoadingSpinner({ label = 'Loading' }: LoadingSpinnerProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-8">
+    <div className="flex flex-col items-center justify-center gap-4 py-10">
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
-        className={`${sizes[size]} rounded-full border-accent/20 border-t-accent`}
-        aria-hidden
-      />
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <LogoMark className="h-10 w-10 opacity-80" />
+      </motion.div>
       <motion.p
-        initial={{ opacity: 0.4 }}
-        animate={{ opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 1.6, repeat: Infinity }}
+        animate={{ opacity: [0.4, 0.85, 0.4] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
         className="text-sm text-ink-muted font-medium"
       >
         {label}
