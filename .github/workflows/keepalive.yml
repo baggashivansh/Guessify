@@ -1,7 +1,7 @@
 name: Keep API Warm
 
 # Pings the production API so Render free tier does not spin down.
-# After deploy: Settings → Secrets → add GUESSIFY_API_URL (e.g. https://guessify-api.onrender.com)
+# Secret: GUESSIFY_API_URL = https://guessify-r1mi.onrender.com (no trailing slash)
 
 on:
   schedule:
@@ -13,10 +13,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Health check
+        env:
+          API_URL: ${{ secrets.GUESSIFY_API_URL }}
         run: |
-          if [ -z "${{ secrets.GUESSIFY_API_URL }}" ]; then
+          if [ -z "$API_URL" ]; then
             echo "GUESSIFY_API_URL secret not set — skipping ping."
             exit 0
           fi
-          curl -sf --max-time 30 "${{ secrets.GUESSIFY_API_URL }}/api/health" | grep -q '"status":"UP"'
-          echo "API is UP"
+
+          BASE="${API_URL%/}"
+          HEALTH_URL="${BASE}/api/health"
+          echo "Pinging ${HEALTH_URL}"
+
+          # Render free tier cold starts can take 60–90s; first request often wakes the instance.
+          for attempt in 1 2 3 4; do
+            echo "Attempt ${attempt}/4..."
+            if response=$(curl -sS --max-time 120 "$HEALTH_URL" 2>/dev/null); then
+              if echo "$response" | grep -q '"status":"UP"'; then
+                echo "API is UP: $response"
+                exit 0
+              fi
+              echo "Unexpected response: $response"
+            else
+              echo "Request failed or timed out (instance may be waking up)."
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              sleep 20
+            fi
+          done
+
+          echo "API did not return UP after 4 attempts — Render may still be cold starting."
+          echo "Keepalive traffic was sent; treating as non-fatal."
+          exit 0
