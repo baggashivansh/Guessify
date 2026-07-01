@@ -1,47 +1,83 @@
 name: Keep API Warm
 
-# Pings the production API so Render free tier does not spin down.
-# Secret: GUESSIFY_API_URL = https://guessify-r1mi.onrender.com (no trailing slash)
+# Keeps the Render free-tier API awake. Designed to never fail the workflow.
+# Optional secret: GUESSIFY_API_URL (defaults to production Render URL)
 
 on:
   schedule:
-    - cron: '*/14 * * * *'
+    - cron: '*/10 * * * *'
   workflow_dispatch:
+
+concurrency:
+  group: keep-api-warm
+  cancel-in-progress: false
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
-      - name: Health check
+      - name: Wake and health-check API
+        continue-on-error: true
         env:
           API_URL: ${{ secrets.GUESSIFY_API_URL }}
+          VERCEL_URL: https://guessify-eight.vercel.app
         run: |
-          if [ -z "$API_URL" ]; then
-            echo "GUESSIFY_API_URL secret not set — skipping ping."
-            exit 0
-          fi
+          set +e
+          set +o pipefail
 
-          BASE="${API_URL%/}"
-          HEALTH_URL="${BASE}/api/health"
-          echo "Pinging ${HEALTH_URL}"
+          BASE="${API_URL:-https://guessify-r1mi.onrender.com}"
+          BASE="${BASE%/}"
+          RENDER_HEALTH="${BASE}/api/health"
+          VERCEL_HEALTH="${VERCEL_URL%/}/api/health"
 
-          # Render free tier cold starts can take 60–90s; first request often wakes the instance.
-          for attempt in 1 2 3 4; do
-            echo "Attempt ${attempt}/4..."
-            if response=$(curl -sS --max-time 120 "$HEALTH_URL" 2>/dev/null); then
-              if echo "$response" | grep -q '"status":"UP"'; then
-                echo "API is UP: $response"
-                exit 0
-              fi
-              echo "Unexpected response: $response"
-            else
-              echo "Request failed or timed out (instance may be waking up)."
+          echo "Render target: ${RENDER_HEALTH}"
+          echo "Vercel proxy:  ${VERCEL_HEALTH}"
+
+          ping_once() {
+            local url="$1"
+            local label="$2"
+            echo "→ ${label}"
+            curl -sS -o /tmp/keepalive-body.txt -w "  HTTP %{http_code} (%{time_total}s)\n" \
+              --connect-timeout 20 \
+              --max-time 180 \
+              -H "Accept: application/json" \
+              "$url" || echo "  (timeout or connection error — still counts as wake traffic)"
+            if [ -s /tmp/keepalive-body.txt ]; then
+              head -c 200 /tmp/keepalive-body.txt
+              echo ""
             fi
-            if [ "$attempt" -lt 4 ]; then
-              sleep 20
+          }
+
+          healthy=0
+          for attempt in 1 2 3 4 5 6; do
+            echo ""
+            echo "=== Attempt ${attempt}/6 ==="
+            ping_once "${RENDER_HEALTH}" "Render direct"
+            ping_once "${VERCEL_HEALTH}" "Vercel proxy"
+
+            body=$(curl -sS --connect-timeout 20 --max-time 180 "${RENDER_HEALTH}" 2>/dev/null || true)
+            if echo "$body" | grep -qi '"status"[[:space:]]*:[[:space:]]*"UP"'; then
+              echo "✓ API is UP"
+              healthy=1
+              break
             fi
+            if echo "$body" | grep -qi 'UP'; then
+              echo "✓ API responded: ${body}"
+              healthy=1
+              break
+            fi
+
+            wait=$((15 + attempt * 8))
+            echo "Not healthy yet — waiting ${wait}s before retry..."
+            sleep "$wait"
           done
 
-          echo "API did not return UP after 4 attempts — Render may still be cold starting."
-          echo "Keepalive traffic was sent; treating as non-fatal."
+          if [ "$healthy" -eq 1 ]; then
+            echo "::notice title=Keep API Warm::API is healthy."
+          else
+            echo "::notice title=Keep API Warm::Wake pings sent. Render free tier may still be cold starting — workflow marked successful."
+          fi
+
           exit 0
